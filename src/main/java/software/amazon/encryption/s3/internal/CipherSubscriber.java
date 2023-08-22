@@ -50,7 +50,9 @@ public class CipherSubscriber implements Subscriber<ByteBuffer> {
             // if it's not the last part,
             // we need to use an aux cipher
             if (!isLastPart) {
+                System.out.println("resubscribing!");
                 cipher = materials.getAuxCipher(iv, contentLength);
+                contentRead.set(0);
             }
             System.out.println("resubscribing!");
             LogFactory.getLog(this.getClass()).info("resubscribing");
