@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 package software.amazon.encryption.s3.internal;
 
+import org.apache.commons.logging.LogFactory;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 import software.amazon.awssdk.utils.BinaryUtils;
@@ -11,6 +12,7 @@ import software.amazon.encryption.s3.materials.CryptographicMaterials;
 import javax.crypto.Cipher;
 import java.nio.ByteBuffer;
 import java.security.GeneralSecurityException;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class CipherSubscriber implements Subscriber<ByteBuffer> {
@@ -40,6 +42,9 @@ public class CipherSubscriber implements Subscriber<ByteBuffer> {
 
     @Override
     public void onSubscribe(Subscription s) {
+        // reset on subscription
+        contentRead.set(0);
+        cipher = materials.getCipher(iv);
         wrappedSubscriber.onSubscribe(s);
     }
 

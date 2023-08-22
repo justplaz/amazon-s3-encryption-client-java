@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 package software.amazon.encryption.s3.internal;
 
+import org.apache.commons.logging.LogFactory;
 import org.reactivestreams.Subscriber;
 import software.amazon.awssdk.core.async.AsyncRequestBody;
 import software.amazon.encryption.s3.S3EncryptionClientException;
@@ -34,7 +35,10 @@ public class NoRetriesAsyncRequestBody implements AsyncRequestBody {
         if (subscribeCalled.compareAndSet(false, true)) {
             wrappedAsyncRequestBody.subscribe(subscriber);
         } else {
-            throw new S3EncryptionClientException("Re-subscription is not supported! Retry the entire operation.");
+            // resubscription
+            System.out.println("resubscribing!");
+            LogFactory.getLog(this.getClass()).info("resubscribing");
+            wrappedAsyncRequestBody.subscribe(subscriber);
         }
     }
 }

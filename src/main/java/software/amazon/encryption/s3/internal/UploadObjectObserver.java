@@ -70,8 +70,7 @@ public class UploadObjectObserver {
                 // Upload the ciphertext directly via the non-encrypting
                 // s3 client
                 try {
-                    AsyncRequestBody noRetriesBody = new NoRetriesAsyncRequestBody(AsyncRequestBody.fromFile(part));
-                    return uploadPart(reqUploadPart, noRetriesBody);
+                    return uploadPart(reqUploadPart, AsyncRequestBody.fromFile(part));
                 } catch (CompletionException e) {
                     // Unwrap completion exception
                     throw new S3EncryptionClientException(e.getCause().getMessage(), e.getCause());
