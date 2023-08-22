@@ -5,7 +5,6 @@ package software.amazon.encryption.s3.internal;
 import org.apache.commons.logging.LogFactory;
 import org.reactivestreams.Subscriber;
 import software.amazon.awssdk.core.async.AsyncRequestBody;
-import software.amazon.encryption.s3.S3EncryptionClientException;
 
 import java.nio.ByteBuffer;
 import java.util.Optional;
