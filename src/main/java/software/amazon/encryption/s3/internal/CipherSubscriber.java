@@ -47,7 +47,6 @@ public class CipherSubscriber implements Subscriber<ByteBuffer> {
             // original subscription
             wrappedSubscriber.onSubscribe(s);
         } else {
-            // resubscription
             // if it's not the last part,
             // we need to use an aux cipher
             if (!isLastPart) {
@@ -57,8 +56,6 @@ public class CipherSubscriber implements Subscriber<ByteBuffer> {
             LogFactory.getLog(this.getClass()).info("resubscribing");
             wrappedSubscriber.onSubscribe(s);
         }
-        // reset on subscription
-        wrappedSubscriber.onSubscribe(s);
     }
 
     @Override
