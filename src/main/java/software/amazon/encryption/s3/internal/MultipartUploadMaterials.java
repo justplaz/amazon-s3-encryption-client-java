@@ -6,6 +6,7 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import software.amazon.awssdk.services.s3.model.S3Request;
 import software.amazon.encryption.s3.S3EncryptionClientException;
 import software.amazon.encryption.s3.algorithms.AlgorithmSuite;
+import software.amazon.encryption.s3.legacy.internal.AesCtrUtils;
 import software.amazon.encryption.s3.materials.CryptographicMaterials;
 import software.amazon.encryption.s3.materials.EncryptionMaterials;
 
@@ -49,6 +50,10 @@ public class MultipartUploadMaterials implements CryptographicMaterials {
         return new Builder();
     }
 
+    static public Builder builder(final MultipartUploadMaterials in) {
+        return new Builder(in);
+    }
+
     public final boolean hasFinalPartBeenSeen() {
         return hasFinalPartBeenSeen;
     }
@@ -77,6 +82,17 @@ public class MultipartUploadMaterials implements CryptographicMaterials {
             throw new S3EncryptionClientException("IVs in MultipartUploadMaterials do not match!");
         }
         return _cipher;
+    }
+
+    @Override
+    public Cipher getAuxCipher(byte[] originalIv, long partSize) {
+        byte[] adjustedIv = AesCtrUtils.adjustIV(this.getIv(), _plaintextLength - partSize);
+        MultipartUploadMaterials auxMaterials = MultipartUploadMaterials.builder(this)
+                .algorithmSuite(AlgorithmSuite.ALG_AES_256_CTR_IV16_TAG16_NO_KDF)
+                .cipher(null)
+                .build();
+
+        return CipherProvider.createAndInitCipher(auxMaterials, adjustedIv);
     }
 
     public byte[] getIv() {
@@ -188,6 +204,16 @@ public class MultipartUploadMaterials implements CryptographicMaterials {
         private Cipher _cipher = null;
 
         private Builder() {
+        }
+
+        private Builder(MultipartUploadMaterials in) {
+            _s3Request = in._s3Request;
+            _algorithmSuite = in.algorithmSuite();
+            _encryptionContext = in.encryptionContext();
+            _plaintextDataKey = in._plaintextDataKey;
+            _plaintextLength = in._plaintextLength;
+            _cryptoProvider = in.cryptoProvider();
+            _cipher = in._cipher;
         }
 
         public Builder s3Request(S3Request s3Request) {

@@ -26,4 +26,6 @@ public interface CryptographicMaterials {
 
     Cipher getCipher(byte[] iv);
 
+    Cipher getAuxCipher(byte[] originalIv, long position);
+
 }

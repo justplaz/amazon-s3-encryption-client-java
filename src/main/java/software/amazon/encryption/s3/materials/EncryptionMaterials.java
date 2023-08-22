@@ -4,6 +4,7 @@ package software.amazon.encryption.s3.materials;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import software.amazon.awssdk.services.s3.model.S3Request;
+import software.amazon.encryption.s3.S3EncryptionClientException;
 import software.amazon.encryption.s3.algorithms.AlgorithmSuite;
 import software.amazon.encryption.s3.internal.CipherMode;
 import software.amazon.encryption.s3.internal.CipherProvider;
@@ -110,6 +111,12 @@ final public class EncryptionMaterials implements CryptographicMaterials {
     public Cipher getCipher(byte[] iv) {
         return CipherProvider.createAndInitCipher(this, iv);
     }
+
+    @Override
+    public Cipher getAuxCipher(byte[] originalIv, long position) {
+        throw new S3EncryptionClientException("aux cipher not supported for Encryption");
+    }
+
 
     public Builder toBuilder() {
         return new Builder()

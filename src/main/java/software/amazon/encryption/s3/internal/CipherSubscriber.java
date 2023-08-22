@@ -23,6 +23,7 @@ public class CipherSubscriber implements Subscriber<ByteBuffer> {
     private final CryptographicMaterials materials;
     private byte[] iv;
     private boolean isLastPart;
+    private final AtomicBoolean subscribeCalled = new AtomicBoolean(false);
 
     private byte[] outputBuffer;
 
@@ -42,9 +43,21 @@ public class CipherSubscriber implements Subscriber<ByteBuffer> {
 
     @Override
     public void onSubscribe(Subscription s) {
+        if (subscribeCalled.compareAndSet(false, true)) {
+            // original subscription
+            wrappedSubscriber.onSubscribe(s);
+        } else {
+            // resubscription
+            // if it's not the last part,
+            // we need to use an aux cipher
+            if (!isLastPart) {
+                cipher = materials.getAuxCipher(iv, contentLength);
+            }
+            System.out.println("resubscribing!");
+            LogFactory.getLog(this.getClass()).info("resubscribing");
+            wrappedSubscriber.onSubscribe(s);
+        }
         // reset on subscription
-        contentRead.set(0);
-        cipher = materials.getCipher(iv);
         wrappedSubscriber.onSubscribe(s);
     }
 
