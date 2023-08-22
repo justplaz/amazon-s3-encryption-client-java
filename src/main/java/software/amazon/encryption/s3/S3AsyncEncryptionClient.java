@@ -22,6 +22,7 @@ import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectResponse;
 import software.amazon.awssdk.services.s3.model.S3Request;
 import software.amazon.encryption.s3.internal.GetEncryptedObjectPipeline;
+import software.amazon.encryption.s3.internal.NoRetriesAsyncRequestBody;
 import software.amazon.encryption.s3.internal.PutEncryptedObjectPipeline;
 import software.amazon.encryption.s3.materials.AesKeyring;
 import software.amazon.encryption.s3.materials.CryptographicMaterialsManager;
@@ -143,7 +144,8 @@ public class S3AsyncEncryptionClient extends DelegatingS3AsyncClient {
                 .cryptoMaterialsManager(_cryptoMaterialsManager)
                 .secureRandom(_secureRandom)
                 .build();
-        return pipeline.putObject(putObjectRequest, requestBody);
+        AsyncRequestBody noRetryBody = new NoRetriesAsyncRequestBody(requestBody);
+        return pipeline.putObject(putObjectRequest, noRetryBody);
     }
 
     /**
